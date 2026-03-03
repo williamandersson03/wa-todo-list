@@ -3,26 +3,25 @@
 <section class="panel app-panel">
   <header class="topbar">
     <div>
-      <p class="eyebrow">WA TODO</p>
-      <h1>My TODOs</h1>
-      <p class="muted">{{ hero_subtitle }}</p>
-      <p class="category-help">{{ category_help }}</p>
+      <h1>To Do List</h1>
+      <p class="muted hero-copy">{{ hero_subtitle }}</p>
     </div>
-    <form method="post" action="/logout">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-      <button class="btn secondary" type="submit">Logout</button>
-    </form>
+    <div class="session-box">
+      <span class="signed-in">{{ user.email }}</span>
+      <form method="post" action="/logout">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <button class="btn btn-outline" type="submit">Logout</button>
+      </form>
+    </div>
   </header>
 
-  <p class="signed-in">Signed in as {{ user.email }}</p>
   {% if error %}<p class="error">{{ error }}</p>{% endif %}
 
   <form method="post" action="/todo/add" class="composer">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-    <textarea id="todo-content" name="content" maxlength="5000" rows="4" placeholder="Write one task per line. Enter to submit, Shift+Enter for a new line." required></textarea>
-    <div class="composer-footer">
-      <small>Use P###, K###, M######, §Office task, or §P842 Em117§ around category text.</small>
-      <button class="btn" type="submit">Add TODOs</button>
+    <div class="composer-input-wrap">
+      <textarea id="todo-content" name="content" maxlength="5000" rows="3" placeholder="Write one task per line..." required></textarea>
+      <button class="btn btn-inverse composer-submit" type="submit">Add</button>
     </div>
   </form>
 
@@ -36,12 +35,12 @@
               <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
               <input type="hidden" name="category_key" value="{{ category }}" />
               <input type="text" name="text" maxlength="500" placeholder="Add to this list" required />
-              <button class="btn tiny" type="submit">Add</button>
+              <button class="btn btn-inverse tiny" type="submit">Add</button>
             </form>
             <form method="post" action="/todo/clear_done">
               <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
               <input type="hidden" name="category_key" value="{{ category }}" />
-              <button class="btn tiny secondary" type="submit">Clear completed</button>
+              <button class="btn btn-outline tiny" type="submit">Clear completed</button>
             </form>
           </div>
         </div>

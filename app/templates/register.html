@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="panel auth-panel">
+<section class="panel auth-panel clean-auth">
   <h1>Register</h1>
   {% if error %}<p class="error">{{ error }}</p>{% endif %}
-  <form method="post" action="/register" class="stack">
+  <form method="post" action="/register" class="stack auth-form">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     <label>Email
       <input type="email" name="email" required autocomplete="email" />
@@ -11,7 +11,7 @@
     <label>Password
       <input type="password" name="password" minlength="10" required autocomplete="new-password" />
     </label>
-    <button class="btn" type="submit">Register</button>
+    <button class="btn btn-inverse auth-submit" type="submit">Register</button>
   </form>
   <p class="muted">Already have an account? <a href="/login">Login</a></p>
 </section>

@@ -250,9 +250,8 @@ def app_page(request: Request, conn: sqlite3.Connection = Depends(get_db)):
         request,
         "app.html",
         {
-            "title": "My TODOs",
+            "title": "To Do List",
             "hero_subtitle": "A simple way to track your work",
-            "category_help": "Use P###, K###, M###### or §Category to group tasks automatically.",
             "user": user,
             "categories": categories,
             "todos": grouped,
