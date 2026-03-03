@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="panel app-panel">
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">WA TODO</p>
+      <h1>My TODOs</h1>
+      <p class="muted">{{ hero_subtitle }}</p>
+      <p class="category-help">{{ category_help }}</p>
+    </div>
+    <form method="post" action="/logout">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+      <button class="btn secondary" type="submit">Logout</button>
+    </form>
+  </header>
+
+  <p class="signed-in">Signed in as {{ user.email }}</p>
+  {% if error %}<p class="error">{{ error }}</p>{% endif %}
+
+  <form method="post" action="/todo/add" class="composer">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <textarea id="todo-content" name="content" maxlength="5000" rows="4" placeholder="Write one task per line. Enter to submit, Shift+Enter for a new line." required></textarea>
+    <div class="composer-footer">
+      <small>Example: P842 fix issue · §Office call supplier · plan weekly check-in</small>
+      <button class="btn" type="submit">Add TODOs</button>
+    </div>
+  </form>
+
+  <div class="categories">
+    {% for category in categories %}
+      <section class="category-card">
+        <div class="category-head">
+          <h2>{{ category }}</h2>
+          <form method="post" action="/todo/clear_done">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+            <input type="hidden" name="category_key" value="{{ category }}" />
+            <button class="btn tiny secondary" type="submit">Clear completed</button>
+          </form>
+        </div>
+        <ul>
+          {% for todo in todos[category] %}
+            <li class="todo-item {% if todo.completed_at %}done{% endif %}">
+              <form method="post" action="/todo/toggle" class="toggle-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+                <input type="hidden" name="todo_id" value="{{ todo.id }}" />
+                <button class="todo-toggle-btn" type="submit" aria-label="Toggle completion">
+                  <span class="check">{% if todo.completed_at %}✓{% else %}○{% endif %}</span>
+                  <span class="todo-main">
+                    <span class="todo-text">{{ todo.text }}</span>
+                    <span class="timestamps">
+                      <small>Created: {{ format_local_timestamp(todo.created_at) }}</small>
+                      {% if todo.completed_at %}<small>Completed: {{ format_local_timestamp(todo.completed_at) }}</small>{% endif %}
+                    </span>
+                  </span>
+                </button>
+              </form>
+              {% if todo.completed_at %}
+              <form method="post" action="/todo/delete" class="inline-form delete-wrap">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+                <input type="hidden" name="todo_id" value="{{ todo.id }}" />
+                <button class="btn tiny danger" type="submit">Delete</button>
+              </form>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      </section>
+    {% else %}
+      <p class="muted">No TODOs yet. Add your first task above.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
