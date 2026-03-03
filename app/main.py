@@ -5,6 +5,7 @@ import sqlite3
 from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 from fastapi import Depends, FastAPI, Form, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -23,6 +24,7 @@ base_dir = Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=str(base_dir / "templates"))
 app.mount("/static", StaticFiles(directory=str(base_dir / "static")), name="static")
 settings = get_settings()
+local_tz = ZoneInfo(settings.app_timezone)
 rate_limiter = LoginRateLimiter(settings.login_rate_limit_attempts, settings.login_rate_limit_window_seconds)
 
 
@@ -44,6 +46,19 @@ async def security_headers_middleware(request: Request, call_next):
 
 def utc_now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def format_local_timestamp(value: str | None) -> str:
+    if not value:
+        return ""
+    try:
+        dt = datetime.fromisoformat(value)
+    except ValueError:
+        dt = datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
+        dt = dt.replace(tzinfo=timezone.utc)
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(local_tz).strftime("%Y-%m-%d %H:%M")
 
 
 def set_session_cookie(response: HTMLResponse | RedirectResponse, sid: str) -> None:
@@ -98,6 +113,7 @@ def render(request: Request, template_name: str, context: dict, conn: sqlite3.Co
             **context,
             "csrf_token": session["csrf_token"],
             "is_authenticated": bool(session["user_id"]),
+            "format_local_timestamp": format_local_timestamp,
         },
         status_code=status_code,
     )
@@ -221,7 +237,20 @@ def app_page(request: Request, conn: sqlite3.Connection = Depends(get_db)):
         grouped[row["category_key"]].append(row)
         latest.setdefault(row["category_key"], row["created_at"])
     categories = sorted(grouped.keys(), key=lambda key: latest[key], reverse=True)
-    return render(request, "app.html", {"title": "My TODOs", "user": user, "categories": categories, "todos": grouped, "error": request.query_params.get("error")}, conn)
+    return render(
+        request,
+        "app.html",
+        {
+            "title": "My TODOs",
+            "hero_subtitle": "A simple way to track your work",
+            "category_help": "Use P###, K###, M###### or §Category to group tasks automatically.",
+            "user": user,
+            "categories": categories,
+            "todos": grouped,
+            "error": request.query_params.get("error"),
+        },
+        conn,
+    )
 
 
 @app.post("/todo/add")

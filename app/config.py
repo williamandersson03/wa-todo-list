@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     host: str = "0.0.0.0"
     port: int = 8000
     debug: bool = False
+    app_timezone: str = "Europe/Stockholm"
 
     session_cookie_name: str = "wa_session"
     session_max_age_seconds: int = 60 * 60 * 24 * 7
