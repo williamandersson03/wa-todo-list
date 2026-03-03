@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="panel app-panel">
+  <header class="topbar">
+    <div>
+      <h1>My TODOs</h1>
+      <p class="muted">Signed in as {{ user.email }}</p>
+    </div>
+    <form method="post" action="/logout">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+      <button class="btn secondary" type="submit">Logout</button>
+    </form>
+  </header>
+
+  {% if error %}<p class="error">{{ error }}</p>{% endif %}
+
+  <form method="post" action="/todo/add" class="composer">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <textarea id="todo-content" name="content" maxlength="5000" rows="3" placeholder="Type tasks. Enter to submit, Shift+Enter for new line." required></textarea>
+    <button class="btn" type="submit">Add TODOs</button>
+  </form>
+
+  <div class="categories">
+    {% for category in categories %}
+      <section class="category-card">
+        <div class="category-head">
+          <h2>{{ category }}</h2>
+          <form method="post" action="/todo/clear_done">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+            <input type="hidden" name="category_key" value="{{ category }}" />
+            <button class="btn tiny secondary" type="submit">Clear completed</button>
+          </form>
+        </div>
+        <ul>
+          {% for todo in todos[category] %}
+            <li class="todo-item {% if todo.completed_at %}done{% endif %}">
+              <form method="post" action="/todo/toggle" class="inline-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+                <input type="hidden" name="todo_id" value="{{ todo.id }}" />
+                <button class="check" type="submit" aria-label="Toggle completion">{% if todo.completed_at %}✓{% else %}○{% endif %}</button>
+              </form>
+              <div class="todo-main">
+                <p>{{ todo.text }}</p>
+                <small>{{ todo.created_at }}</small>
+              </div>
+              {% if todo.completed_at %}
+              <form method="post" action="/todo/delete" class="inline-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+                <input type="hidden" name="todo_id" value="{{ todo.id }}" />
+                <button class="btn tiny danger" type="submit">Delete</button>
+              </form>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      </section>
+    {% else %}
+      <p class="muted">No TODOs yet. Add your first task above.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

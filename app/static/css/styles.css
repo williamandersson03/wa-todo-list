@@ -1,0 +1,73 @@
+:root {
+  color-scheme: light;
+  --bg1: #d9e8ff;
+  --bg2: #d7f5ee;
+  --text: #1f2937;
+  --panel: rgba(255, 255, 255, 0.62);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--text);
+  min-height: 100vh;
+}
+.bg-gradient {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(140deg, var(--bg1), var(--bg2));
+  z-index: -2;
+}
+.shell { max-width: 980px; margin: 2rem auto; padding: 0 1rem; }
+.panel {
+  background: var(--panel);
+  border-radius: 24px;
+  padding: 1.2rem;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.15);
+  backdrop-filter: blur(14px);
+}
+.auth-panel { max-width: 420px; margin: 8vh auto; }
+.stack { display: grid; gap: .8rem; }
+label { display: grid; gap: .4rem; font-weight: 600; }
+input, textarea {
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid rgba(15,23,42,.15);
+  padding: .65rem .8rem;
+  font: inherit;
+}
+textarea { resize: vertical; min-height: 84px; }
+.btn {
+  border: none;
+  border-radius: 12px;
+  background: #1d4ed8;
+  color: white;
+  padding: .6rem .9rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+.btn.secondary { background: rgba(30,41,59,.8); }
+.btn.danger { background: #b91c1c; }
+.btn.tiny { font-size: .82rem; padding: .4rem .7rem; }
+.actions-row { display: flex; gap: .75rem; margin-top: 1rem; }
+.muted { color: #475569; }
+.error { color: #b91c1c; font-weight: 600; }
+.topbar { display:flex; justify-content: space-between; align-items:center; gap:1rem; }
+.composer { display:grid; gap:.6rem; margin: 1rem 0 1.2rem; }
+.categories { display:grid; gap: 1rem; }
+.category-card { background: rgba(255,255,255,.68); border-radius: 18px; padding: .85rem; }
+.category-head { display:flex; justify-content: space-between; align-items:center; gap: .8rem; }
+ul { list-style:none; margin: .6rem 0 0; padding:0; }
+.todo-item { display:flex; align-items:flex-start; gap:.6rem; padding:.55rem 0; border-bottom:1px solid rgba(15,23,42,.08); }
+.todo-item:last-child { border-bottom:none; }
+.todo-item.done p { text-decoration: line-through; color: #64748b; }
+.inline-form { margin: 0; }
+.check { border:none; background:transparent; font-size:1.2rem; cursor:pointer; color:#0f172a; padding:.2rem; }
+.todo-main p { margin:0; }
+.todo-main small { color:#64748b; }
+@media (max-width: 640px) {
+  .shell { margin: 1rem auto; }
+  .topbar { flex-direction: column; align-items: flex-start; }
+}
