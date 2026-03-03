@@ -21,7 +21,7 @@
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     <textarea id="todo-content" name="content" maxlength="5000" rows="4" placeholder="Write one task per line. Enter to submit, Shift+Enter for a new line." required></textarea>
     <div class="composer-footer">
-      <small>Example: P842 fix issue · §Office call supplier · plan weekly check-in</small>
+      <small>Use P###, K###, M######, §Office task, or §P842 Em117§ around category text.</small>
       <button class="btn" type="submit">Add TODOs</button>
     </div>
   </form>
@@ -31,11 +31,19 @@
       <section class="category-card">
         <div class="category-head">
           <h2>{{ category }}</h2>
-          <form method="post" action="/todo/clear_done">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-            <input type="hidden" name="category_key" value="{{ category }}" />
-            <button class="btn tiny secondary" type="submit">Clear completed</button>
-          </form>
+          <div class="category-actions">
+            <form method="post" action="/todo/add_to_category" class="category-quick-add">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+              <input type="hidden" name="category_key" value="{{ category }}" />
+              <input type="text" name="text" maxlength="500" placeholder="Add to this list" required />
+              <button class="btn tiny" type="submit">Add</button>
+            </form>
+            <form method="post" action="/todo/clear_done">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+              <input type="hidden" name="category_key" value="{{ category }}" />
+              <button class="btn tiny secondary" type="submit">Clear completed</button>
+            </form>
+          </div>
         </div>
         <ul>
           {% for todo in todos[category] %}
@@ -44,7 +52,7 @@
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
                 <input type="hidden" name="todo_id" value="{{ todo.id }}" />
                 <button class="todo-toggle-btn" type="submit" aria-label="Toggle completion">
-                  <span class="check">{% if todo.completed_at %}✓{% else %}○{% endif %}</span>
+                  <span class="check" aria-hidden="true">{% if todo.completed_at %}✓{% endif %}</span>
                   <span class="todo-main">
                     <span class="todo-text">{{ todo.text }}</span>
                     <span class="timestamps">

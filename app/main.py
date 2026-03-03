@@ -61,6 +61,15 @@ def format_local_timestamp(value: str | None) -> str:
     return dt.astimezone(local_tz).strftime("%Y-%m-%d %H:%M")
 
 
+
+
+def normalize_todo_text(value: str) -> str:
+    cleaned = re.sub(r"\s+", " ", value.strip())
+    if not cleaned:
+        return "Untitled task"
+    return cleaned[:1].upper() + cleaned[1:]
+
+
 def set_session_cookie(response: HTMLResponse | RedirectResponse, sid: str) -> None:
     response.set_cookie(
         settings.session_cookie_name,
@@ -316,5 +325,39 @@ def clear_done(request: Request, category_key: str = Form(...), csrf_token: str 
         return redirect("/login", request, conn)
 
     conn.execute("DELETE FROM todos WHERE user_id = ? AND category_key = ? AND completed_at IS NOT NULL", (user["id"], category_key))
+    conn.commit()
+    return redirect("/app", request, conn)
+
+
+@app.post("/todo/add_to_category")
+def todo_add_to_category(
+    request: Request,
+    category_key: str = Form(...),
+    text: str = Form(...),
+    csrf_token: str = Form(...),
+    conn: sqlite3.Connection = Depends(get_db),
+):
+    try:
+        user, session = auth_user(request, conn)
+        require_csrf(session, csrf_token)
+    except (PermissionError, ValueError):
+        return redirect("/login", request, conn)
+
+    clean_category = category_key.strip()[: settings.category_max_length]
+    if not clean_category:
+        return redirect("/app?error=Category+is+required", request, conn)
+
+    normalized_text = normalize_todo_text(text)[: settings.todo_max_length]
+
+    existing = conn.execute(
+        "SELECT category_type FROM todos WHERE user_id = ? AND category_key = ? ORDER BY datetime(created_at) DESC LIMIT 1",
+        (user["id"], clean_category),
+    ).fetchone()
+    category_type = existing["category_type"] if existing else ("GENERAL" if clean_category == "GENERAL" else "CUSTOM")
+
+    conn.execute(
+        "INSERT INTO todos (user_id, category_key, category_type, text, created_at) VALUES (?, ?, ?, ?, ?)",
+        (user["id"], clean_category, category_type, normalized_text, utc_now_iso()),
+    )
     conn.commit()
     return redirect("/app", request, conn)

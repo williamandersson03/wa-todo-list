@@ -15,6 +15,13 @@ def test_case_insensitive_custom_category_precedence():
     assert parsed.text == "P842 check inventory"
 
 
+def test_enclosed_custom_category_anywhere_takes_precedence():
+    parsed = parse_line("Call vendor §P842 Em117§ tomorrow")
+    assert parsed.category_key == "P842 Em117"
+    assert parsed.category_type == "CUSTOM"
+    assert parsed.text == "Call vendor tomorrow"
+
+
 def test_multiple_spaces_trimmed():
     parsed = parse_line("   K186    prepare    report   ")
     assert parsed.category_key == "K186"
